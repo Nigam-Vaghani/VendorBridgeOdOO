@@ -1,15 +1,20 @@
 from pydantic import BaseModel, EmailStr
-from models.user import RoleEnum
+from core.enums import RoleEnum
 from schemas.user import UserOut
 
 from typing import Optional
 from uuid import UUID
 
 class SignupRequest(BaseModel):
-    name: str
+    first_name: str
+    last_name: str
     email: EmailStr
     password: str
-    role: RoleEnum
+    phone_number: Optional[str] = ""
+    role: str
+    country: Optional[str] = ""
+    additional_info: Optional[str] = ""
+    photo_url: Optional[str] = ""
     vendor_id: Optional[UUID] = None
 
 class LoginRequest(BaseModel):
