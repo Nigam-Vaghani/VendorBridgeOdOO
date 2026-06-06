@@ -8,8 +8,9 @@ import LoginPage from '../pages/Auth/LoginPage';
 import SignupPage from '../pages/Auth/SignupPage';
 import ForgotPasswordPage from '../pages/Auth/ForgotPasswordPage';
 
+import { Dashboard } from '../pages/Dashboard/Dashboard';
+
 // Placeholders for other pages
-const Dashboard = () => <div>Dashboard</div>;
 const Vendors = () => <div>Vendors</div>;
 const RFQs = () => <div>RFQs</div>;
 const Quotations = () => <div>Quotations</div>;
