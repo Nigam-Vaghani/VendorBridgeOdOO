@@ -80,7 +80,7 @@ For hackathon judges and evaluators, here are the recommended ways to explore th
 
 - **Nigam Vaghani**
 - **Dhanesh Vagahsiya**
-- **Rohit Sharma**
+- **Rohit Rathod**
 
 **Evaluator / Reviewer:**
 - **Bhavya Mehta (mebh)** | 📧 mebh@odoo.com | 🐙 [@mebh-odoo](https://github.com/mebh-odoo)
