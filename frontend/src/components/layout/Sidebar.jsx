@@ -19,7 +19,7 @@ export const Sidebar = () => {
 
   const allLinks = [
     { name: 'Dashboard', path: '/dashboard', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER, ROLES.VENDOR], icon: LayoutDashboard },
-    { name: 'Vendors', path: '/vendors', roles: [ROLES.ADMIN, ROLES.OFFICER], icon: Users },
+    { name: 'Vendors', path: '/vendors', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER, ROLES.VENDOR], icon: Users },
     { name: 'RFQs', path: '/rfqs', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER, ROLES.VENDOR], icon: FileText },
     { name: 'Quotations', path: '/quotations', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.VENDOR], icon: FileSignature },
     { name: 'Compare Quotes', path: '/compare-quotes', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER], icon: GitCompare },

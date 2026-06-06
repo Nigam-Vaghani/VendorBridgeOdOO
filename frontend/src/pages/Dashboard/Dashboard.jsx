@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { getDashboardStats } from '../../api/dashboardApi';
 import {
   FileText,
   Clock,
@@ -8,32 +11,55 @@ import {
   UserPlus,
   FilePlus,
   PieChart,
-  BarChart3,
-  TrendingUp
+  TrendingUp,
+  Loader2
 } from 'lucide-react';
 
 export const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const res = await getDashboardStats();
+        if (res.success) {
+          setStats(res.data);
+        }
+      } catch (err) {
+        setError('Failed to load dashboard stats');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const statCards = [
-    { title: "Active RFQ's", value: "12", icon: FileText },
-    { title: "Pending Approvals", value: "5", icon: Clock },
-    { title: "PO's this month", value: "$ 2.3L", icon: DollarSign },
-    { title: "overdue invoices", value: "3", icon: AlertCircle },
+    { title: "Active RFQ's", value: loading ? '…' : (stats?.active_rfqs ?? 0), icon: FileText },
+    { title: "Pending Approvals", value: loading ? '…' : (stats?.pending_approvals ?? 0), icon: Clock },
+    { title: "PO's this month", value: loading ? '…' : (stats?.pos_this_month ?? '₹0'), icon: DollarSign },
+    { title: "Overdue Invoices", value: loading ? '…' : (stats?.overdue_invoices ?? 0), icon: AlertCircle },
   ];
 
-  const recentPurchases = [
-    { id: 'Po1', vendor: 'Infra', amount: '87000', status: 'Approved' },
-    { id: 'Po2', vendor: 'Tech core', amount: '140000', status: 'Pending' },
-    { id: 'Po3', vendor: 'OfficeNeed Co', amount: '34900', status: 'draft' },
-  ];
+  const recentPurchases = stats?.recent_purchases ?? [];
 
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
+    switch ((status || '').toLowerCase()) {
       case 'approved':
+      case 'completed':
         return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800';
       case 'pending':
+      case 'pending_approval':
+      case 'sent':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
       case 'draft':
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700';
@@ -47,9 +73,16 @@ export const Dashboard = () => {
         <div>
           <h1 className="text-4xl font-bold text-foreground mb-2">Dashboard</h1>
           <p className="text-foreground/80 text-lg">
-            Welcome back, {user?.name || 'Procurement Officer'} - Today's Overview
+            Welcome back, {user?.name || user?.first_name || 'Procurement Officer'} — Today's Overview
           </p>
         </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
 
         {/* Stat Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -60,7 +93,11 @@ export const Dashboard = () => {
                 key={index}
                 className="bg-white/40 dark:bg-black/40 backdrop-blur-lg border border-white/20 dark:border-white/10 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="text-4xl font-bold text-foreground mb-2">{card.value}</div>
+                {loading ? (
+                  <Loader2 size={28} className="animate-spin text-primary/50 mb-2" />
+                ) : (
+                  <div className="text-4xl font-bold text-foreground mb-2">{card.value}</div>
+                )}
                 <div className="flex items-center gap-2 text-foreground/80 font-medium">
                   {card.title}
                   <Icon size={16} className="text-primary opacity-70" />
@@ -79,7 +116,7 @@ export const Dashboard = () => {
             {/* Table */}
             <div className="bg-white/40 dark:bg-black/40 backdrop-blur-lg border border-white/20 dark:border-white/10 rounded-xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
               <div className="px-6 py-4 border-b border-white/20 dark:border-white/10 bg-white/20 dark:bg-black/20">
-                <h2 className="text-xl font-bold text-foreground">Recent Purchases</h2>
+                <h2 className="text-xl font-bold text-foreground">Recent Purchase Orders</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -92,18 +129,32 @@ export const Dashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/20 dark:divide-white/10">
-                    {recentPurchases.map((purchase) => (
-                      <tr key={purchase.id} className="hover:bg-white/30 dark:hover:bg-black/30 transition-colors">
-                        <td className="px-6 py-4 text-foreground font-medium">{purchase.id}</td>
-                        <td className="px-6 py-4 text-foreground/80">{purchase.vendor}</td>
-                        <td className="px-6 py-4 text-foreground/80 font-mono">{purchase.amount}</td>
-                        <td className="px-6 py-4">
-                          <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusColor(purchase.status)}`}>
-                            {purchase.status}
-                          </span>
+                    {loading ? (
+                      <tr>
+                        <td colSpan="4" className="px-6 py-10 text-center text-foreground/50">
+                          <Loader2 size={24} className="animate-spin mx-auto" />
                         </td>
                       </tr>
-                    ))}
+                    ) : recentPurchases.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="px-6 py-10 text-center text-foreground/50">
+                          No purchase orders yet
+                        </td>
+                      </tr>
+                    ) : (
+                      recentPurchases.map((purchase) => (
+                        <tr key={purchase.id} className="hover:bg-white/30 dark:hover:bg-black/30 transition-colors">
+                          <td className="px-6 py-4 text-foreground font-medium">{purchase.id}</td>
+                          <td className="px-6 py-4 text-foreground/80">{purchase.vendor}</td>
+                          <td className="px-6 py-4 text-foreground/80 font-mono">₹{Number(purchase.amount).toLocaleString('en-IN')}</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusColor(purchase.status)}`}>
+                              {purchase.status.replace('_', ' ')}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -111,17 +162,26 @@ export const Dashboard = () => {
 
             {/* Quick Actions */}
             <div className="flex flex-wrap gap-4 pt-4 border-t border-white/20 dark:border-white/10">
-              <button className="flex items-center gap-2 px-6 py-3 bg-white/40 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/10 text-primary rounded-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all shadow-[0_4px_20px_rgb(0,0,0,0.05)] hover:-translate-y-0.5">
+              <button
+                onClick={() => navigate('/rfqs')}
+                className="flex items-center gap-2 px-6 py-3 bg-white/40 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/10 text-primary rounded-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all shadow-[0_4px_20px_rgb(0,0,0,0.05)] hover:-translate-y-0.5"
+              >
                 <Plus size={18} />
-                new RFQ
+                New RFQ
               </button>
-              <button className="flex items-center gap-2 px-6 py-3 bg-white/40 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/10 text-primary rounded-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all shadow-[0_4px_20px_rgb(0,0,0,0.05)] hover:-translate-y-0.5">
+              <button
+                onClick={() => navigate('/vendors/new')}
+                className="flex items-center gap-2 px-6 py-3 bg-white/40 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/10 text-primary rounded-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all shadow-[0_4px_20px_rgb(0,0,0,0.05)] hover:-translate-y-0.5"
+              >
                 <UserPlus size={18} />
                 Add Vendor
               </button>
-              <button className="flex items-center gap-2 px-6 py-3 bg-white/40 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/10 text-primary rounded-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all shadow-[0_4px_20px_rgb(0,0,0,0.05)] hover:-translate-y-0.5">
+              <button
+                onClick={() => navigate('/invoices')}
+                className="flex items-center gap-2 px-6 py-3 bg-white/40 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/10 text-primary rounded-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all shadow-[0_4px_20px_rgb(0,0,0,0.05)] hover:-translate-y-0.5"
+              >
                 <FilePlus size={18} />
-                Create Invoices
+                Create Invoice
               </button>
             </div>
 
@@ -129,9 +189,9 @@ export const Dashboard = () => {
 
           {/* Right Column: Spending Trends */}
           <div className="bg-white/40 dark:bg-black/40 backdrop-blur-lg border border-white/20 dark:border-white/10 rounded-xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col">
-            <h2 className="text-xl font-bold text-foreground mb-6">Spending Trends last 6 months</h2>
+            <h2 className="text-xl font-bold text-foreground mb-6">Spending Trends — last 6 months</h2>
 
-            {/* Static Chart Representation */}
+            {/* Chart Representation */}
             <div className="flex-1 flex flex-col gap-8 justify-center items-center py-8">
               <div className="w-full flex justify-between items-end h-32 px-4 gap-2">
                 <div className="w-1/6 bg-primary/40 rounded-t-sm h-1/3 hover:bg-primary/60 transition-colors"></div>

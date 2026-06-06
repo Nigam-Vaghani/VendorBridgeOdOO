@@ -11,6 +11,8 @@ import ForgotPasswordPage from '../pages/Auth/ForgotPasswordPage';
 
 import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { Vendors } from '../pages/Vendors/Vendors';
+import VendorForm from '../components/vendors/VendorForm';
+import VendorDetail from '../components/vendors/VendorDetail';
 import { RFQs } from '../pages/RFQs/RFQs';
 import { Quotations } from '../pages/Quotations/Quotations';
 import { QuotationComparison } from '../pages/Quotations/QuotationComparison';
@@ -66,6 +68,9 @@ export const AppRouter = () => {
 
           <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER]} />}>
             <Route path="/vendors" element={<Vendors />} />
+            <Route path="/vendors/new" element={<VendorForm />} />
+            <Route path="/vendors/:id/edit" element={<VendorForm />} />
+            <Route path="/vendors/:id" element={<VendorDetail />} />
           </Route>
 
           <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.VENDOR]} />}>

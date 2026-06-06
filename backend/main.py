@@ -4,7 +4,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
 import models  # Import all models to ensure they are registered with Base.metadata
-from routers import auth
+from routers import auth, vendors, dashboard
 
 app = FastAPI(title="VendorBridge API")
 
@@ -24,7 +24,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router)
+app.include_router(auth.router, prefix="/api")
+app.include_router(vendors.router, prefix="/api")
+app.include_router(dashboard.router, prefix="/api")
 
 @app.get("/")
 def read_root():
