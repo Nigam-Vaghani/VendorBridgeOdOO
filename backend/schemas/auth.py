@@ -2,11 +2,15 @@ from pydantic import BaseModel, EmailStr
 from models.user import RoleEnum
 from schemas.user import UserOut
 
+from typing import Optional
+from uuid import UUID
+
 class SignupRequest(BaseModel):
     name: str
     email: EmailStr
     password: str
     role: RoleEnum
+    vendor_id: Optional[UUID] = None
 
 class LoginRequest(BaseModel):
     email: EmailStr

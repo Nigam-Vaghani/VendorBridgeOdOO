@@ -9,8 +9,11 @@ class UserOut(BaseModel):
     name: str
     email: EmailStr
     role: RoleEnum
+    vendor_id: Optional[UUID] = None
     is_active: bool
+    last_login_at: Optional[datetime] = None
     created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True

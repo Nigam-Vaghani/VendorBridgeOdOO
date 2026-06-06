@@ -5,7 +5,7 @@ from models.user import User
 from database import get_db
 from services.auth_service import hash_password, verify_password, create_access_token, create_refresh_token, decode_token
 from config import settings
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -17,7 +17,8 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
         name=request.name,
         email=request.email,
         password_hash=hash_password(request.password),
-        role=request.role
+        role=request.role,
+        vendor_id=request.vendor_id
     )
     db.add(user)
     db.commit()
@@ -32,6 +33,10 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == request.email).first()
     if not user or not verify_password(request.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    user.last_login_at = datetime.now()
+    db.commit()
+    db.refresh(user)
     
     access_token = create_access_token(data={"sub": user.email})
     refresh_token = create_refresh_token(data={"sub": user.email})
