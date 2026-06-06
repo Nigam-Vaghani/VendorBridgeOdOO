@@ -17,6 +17,8 @@ import { RFQs } from '../pages/RFQs/RFQs';
 import RFQForm from '../components/rfqs/RFQForm';
 import RFQDetail from '../components/rfqs/RFQDetail';
 import { Quotations } from '../pages/Quotations/Quotations';
+import QuotationForm from '../components/quotations/QuotationForm';
+import QuotationDetail from '../components/quotations/QuotationDetail';
 import { QuotationComparison } from '../pages/Quotations/QuotationComparison';
 import { Approvals } from '../pages/Approvals/Approvals';
 import { Invoices } from '../pages/Invoices/Invoices';
@@ -83,10 +85,16 @@ export const AppRouter = () => {
 
           <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.VENDOR]} />}>
             <Route path="/quotations" element={<Quotations />} />
+            <Route path="/quotations/:id" element={<QuotationDetail />} />
+          </Route>
+          
+          <Route element={<RoleRoute roles={[ROLES.VENDOR]} />}>
+            <Route path="/quotations/new/:rfqId" element={<QuotationForm />} />
+            <Route path="/quotations/:id/edit" element={<QuotationForm />} />
           </Route>
 
           <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER]} />}>
-            <Route path="/compare-quotes" element={<QuotationComparison />} />
+            <Route path="/rfqs/:rfqId/compare" element={<QuotationComparison />} />
             <Route path="/approvals" element={<Approvals />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/logs" element={<ActivityLogs />} />

@@ -127,6 +127,12 @@ const RFQDetail = () => {
         </button>
 
         <div className="flex items-center gap-2">
+          {isVendor && isSent && (
+            <Button className="bg-[#6322ef] hover:bg-[#6322ef]/90" onClick={() => navigate(`/quotations/new/${id}`)}>
+              Submit Quotation
+            </Button>
+          )}
+
           {canWrite && isDraft && (
             <Button variant="secondary" onClick={() => navigate(`/rfqs/${id}/edit`)}>
               <Edit2 size={14} className="mr-1.5" /> Edit
