@@ -4,6 +4,7 @@
 env/
 venv/
 ENV/
+ksv-venv/
 env.bak/
 venv.bak/
 
