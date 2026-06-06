@@ -8,7 +8,7 @@ ksv-venv/
 env.bak/
 venv.bak/
 
-# Byte-compiled / optimized / DLL files
+# Byte-compiled / optimized /
 __pycache__/
 *.py[cod]
 *$py.class

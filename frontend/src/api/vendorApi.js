@@ -19,6 +19,7 @@ export const createQuotation = async (quotationData) => {
   const { data } = await api.post('/vendor/quotations', quotationData);
   return data;
 };
+// ok
 
 export const getPOs = async () => {
   const { data } = await api.get('/vendor/purchase-orders');

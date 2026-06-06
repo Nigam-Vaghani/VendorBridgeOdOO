@@ -116,7 +116,7 @@ This project was built collaboratively by:
 - **Rohit Sharma**
 
 ---
-
+<!-- ok -->
 ## 👨‍🏫 Evaluator
 
 Special thanks to our evaluator for reviewing this hackathon submission:

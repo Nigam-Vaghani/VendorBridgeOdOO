@@ -18,6 +18,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ok
+
 app.include_router(auth.router)
 app.include_router(vendor_routes.router)
 app.include_router(procurement_routes.router)
