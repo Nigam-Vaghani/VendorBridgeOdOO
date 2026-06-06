@@ -12,6 +12,7 @@ import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { Vendors } from '../pages/Vendors/Vendors';
 import { RFQs } from '../pages/RFQs/RFQs';
 import { Quotations } from '../pages/Quotations/Quotations';
+import { QuotationComparison } from '../pages/Quotations/QuotationComparison';
 
 // Placeholders for other pages
 const Approvals = () => <div>Approvals</div>;
@@ -42,6 +43,10 @@ export const AppRouter = () => {
 
           <Route element={<RoleRoute roles={[ROLES.OFFICER, ROLES.VENDOR]} />}>
             <Route path="/quotations" element={<Quotations />} />
+          </Route>
+
+          <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER]} />}>
+            <Route path="/compare-quotes" element={<QuotationComparison />} />
           </Route>
 
           <Route element={<RoleRoute roles={[ROLES.MANAGER]} />}>
