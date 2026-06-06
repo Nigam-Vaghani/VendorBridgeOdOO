@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
 from uuid import UUID
-from ..models.user import RoleEnum
+from models.user import RoleEnum
 
 class UserOut(BaseModel):
     id: UUID

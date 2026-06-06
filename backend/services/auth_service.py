@@ -3,7 +3,7 @@ from typing import Optional
 from jose import JWTError, jwt
 # pyrefly: ignore [missing-import]
 import bcrypt
-from ..config import settings
+from config import settings
 
 def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()

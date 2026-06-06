@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
-from ..models.user import RoleEnum
-from .user import UserOut
+from models.user import RoleEnum
+from schemas.user import UserOut
 
 class SignupRequest(BaseModel):
     name: str
