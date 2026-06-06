@@ -11,9 +11,9 @@ import ForgotPasswordPage from '../pages/Auth/ForgotPasswordPage';
 import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { Vendors } from '../pages/Vendors/Vendors';
 import { RFQs } from '../pages/RFQs/RFQs';
+import { Quotations } from '../pages/Quotations/Quotations';
 
 // Placeholders for other pages
-const Quotations = () => <div>Quotations</div>;
 const Approvals = () => <div>Approvals</div>;
 const Unauthorized = () => <div className="p-10 text-red-600">Unauthorized Access</div>;
 
@@ -28,7 +28,7 @@ export const AppRouter = () => {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
+
           <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER]} />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/vendors" element={<Vendors />} />
