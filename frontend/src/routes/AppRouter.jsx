@@ -14,6 +14,8 @@ import { Vendors } from '../pages/Vendors/Vendors';
 import VendorForm from '../components/vendors/VendorForm';
 import VendorDetail from '../components/vendors/VendorDetail';
 import { RFQs } from '../pages/RFQs/RFQs';
+import RFQForm from '../components/rfqs/RFQForm';
+import RFQDetail from '../components/rfqs/RFQDetail';
 import { Quotations } from '../pages/Quotations/Quotations';
 import { QuotationComparison } from '../pages/Quotations/QuotationComparison';
 import { Approvals } from '../pages/Approvals/Approvals';
@@ -62,8 +64,14 @@ export const AppRouter = () => {
           <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER, ROLES.VENDOR]} />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/rfqs" element={<RFQs />} />
+            <Route path="/rfqs/:id" element={<RFQDetail />} />
             <Route path="/purchase-orders" element={<PurchaseOrders />} />
             <Route path="/invoices" element={<Invoices />} />
+          </Route>
+
+          <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER]} />}>
+            <Route path="/rfqs/new" element={<RFQForm />} />
+            <Route path="/rfqs/:id/edit" element={<RFQForm />} />
           </Route>
 
           <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER]} />}>

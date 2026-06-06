@@ -1,179 +1,303 @@
-import { useState } from 'react';
-import { Plus, X, UploadCloud, Save, Send } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Plus, Search, Filter, Eye, Edit2, Trash2, Send, X,
+  ChevronDown, FileText, Clock, CheckCircle2, XCircle,
+  AlertCircle, Loader2, RefreshCw
+} from 'lucide-react';
+import { getRFQs, deleteRFQ } from '../../api/rfqApi';
+import { useAuth } from '../../hooks/useAuth';
+import Button from '../../components/ui/Button';
+import Spinner from '../../components/ui/Spinner';
+
+const STATUS_CONFIG = {
+  draft:     { label: 'Draft',     cls: 'bg-slate-100 text-slate-600 border-slate-200' },
+  sent:      { label: 'Sent',      cls: 'bg-blue-100 text-blue-700 border-blue-200' },
+  closed:    { label: 'Closed',    cls: 'bg-amber-100 text-amber-700 border-amber-200' },
+  awarded:   { label: 'Awarded',   cls: 'bg-green-100 text-green-700 border-green-200' },
+  cancelled: { label: 'Cancelled', cls: 'bg-red-100 text-red-600 border-red-200' },
+};
+
+const StatusBadge = ({ status }) => {
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.draft;
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border capitalize ${cfg.cls}`}>
+      {cfg.label}
+    </span>
+  );
+};
+
+const formatDate = (d) => {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
+const isOverdue = (deadline, status) => {
+  return status === 'sent' && new Date(deadline) < new Date();
+};
 
 export const RFQs = () => {
-  const [lineItems, setLineItems] = useState([
-    { id: 1, item: 'Ergonomic chair', qty: 25, unit: 'NOS' },
-    { id: 2, item: 'Standing desks', qty: 10, unit: 'NOS' },
-  ]);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const isVendor = user?.role === 'vendor';
 
-  const [vendors, setVendors] = useState([
-    { id: 1, name: 'Infra Supplies Pvt ltd' },
-    { id: 2, name: 'Techcore LTD' },
-  ]);
+  const [rfqs, setRfqs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [showFilter, setShowFilter] = useState(false);
+  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, pages: 0 });
 
-  const removeLineItem = (id) => {
-    setLineItems(lineItems.filter(item => item.id !== id));
+  const fetchRFQs = useCallback(async (page = 1) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const params = { page, limit: 20 };
+      if (search) params.q = search;
+      if (statusFilter) params.status = statusFilter;
+      const res = await getRFQs(params);
+      if (res.success) {
+        setRfqs(res.data);
+        setPagination(res.pagination);
+      }
+    } catch (e) {
+      setError('Failed to load RFQs');
+    } finally {
+      setLoading(false);
+    }
+  }, [search, statusFilter]);
+
+  useEffect(() => { fetchRFQs(1); }, [fetchRFQs]);
+
+  const handleDelete = async (id, rfq_number) => {
+    if (!window.confirm(`Cancel RFQ ${rfq_number}? This cannot be undone.`)) return;
+    try {
+      await deleteRFQ(id);
+      fetchRFQs(pagination.page);
+    } catch (e) {
+      alert(e.response?.data?.detail || 'Failed to cancel RFQ');
+    }
   };
 
-  const removeVendor = (id) => {
-    setVendors(vendors.filter(v => v.id !== id));
+  const statSummary = {
+    total: pagination.total,
+    draft: rfqs.filter(r => r.status === 'draft').length,
+    sent: rfqs.filter(r => r.status === 'sent').length,
+    closed: rfqs.filter(r => r.status === 'closed').length,
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
-
+    <div className="p-6 animate-in fade-in duration-500">
       {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-foreground mb-2">Create RFQ's</h1>
-        <p className="text-foreground/80 text-lg">Create new request for quotation</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Request for Quotations</h1>
+          <p className="text-sm text-slate-500 mt-0.5">
+            {pagination.total} total RFQs
+          </p>
+        </div>
+        {!isVendor && (
+          <Button onClick={() => navigate('/rfqs/new')}>
+            <Plus size={16} className="mr-1.5" /> New RFQ
+          </Button>
+        )}
       </div>
 
-      {/* Stepper */}
-      <div className="flex items-center w-full py-4">
-        <div className="flex items-center text-primary font-bold">
-          <div className="w-10 h-10 rounded-full border-2 border-primary flex items-center justify-center bg-primary/10">1</div>
-        </div>
-        <div className="flex-1 h-0.5 bg-border mx-4"></div>
-        <div className="flex items-center text-foreground/50 font-bold">
-          <div className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center">2</div>
-        </div>
-        <div className="flex-1 h-0.5 bg-border mx-4"></div>
-        <div className="flex items-center text-foreground/50 font-bold">
-          <div className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center">3</div>
-        </div>
-      </div>
-
-      {/* Main Form Area */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-
-        {/* Left Column: Input Fields */}
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-foreground">RFQ's title*</label>
-            <input
-              type="text"
-              defaultValue="Office Furniture procurement Q2"
-              className="w-full px-4 py-3 bg-card border-2 border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-foreground">Category</label>
-            <input
-              type="text"
-              defaultValue="Furniture"
-              className="w-full px-4 py-3 bg-card border-2 border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-foreground">Deadline*</label>
-            <input
-              type="text"
-              defaultValue="15 June 2025"
-              className="w-full px-4 py-3 bg-card border-2 border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-foreground">Description</label>
-            <textarea
-              rows={4}
-              defaultValue="Ergonomic chairs and standing desks for 3rd floor"
-              className="w-full px-4 py-3 bg-card border-2 border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm resize-none"
-            />
-          </div>
-        </div>
-
-        {/* Right Column: Line Items & Vendors */}
-        <div className="space-y-10">
-
-          {/* Line Items */}
-          <div className="space-y-4">
-            <label className="text-sm font-semibold text-foreground uppercase tracking-wider">Line items</label>
-            <div className="bg-card border-2 border-border rounded-xl overflow-hidden shadow-sm">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b-2 border-border bg-foreground/5">
-                    <th className="px-4 py-3 font-semibold">item</th>
-                    <th className="px-4 py-3 font-semibold w-20">qty</th>
-                    <th className="px-4 py-3 font-semibold w-20">Unit</th>
-                    <th className="px-4 py-3 w-10"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50">
-                  {lineItems.map(item => (
-                    <tr key={item.id}>
-                      <td className="px-4 py-3 text-foreground/80">{item.item}</td>
-                      <td className="px-4 py-3 text-foreground/80">{item.qty}</td>
-                      <td className="px-4 py-3 text-foreground/80">{item.unit}</td>
-                      <td className="px-4 py-3 text-center">
-                        <button onClick={() => removeLineItem(item.id)} className="text-foreground/50 hover:text-red-500 transition-colors">
-                          <X size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        {[
+          { label: 'Total', value: pagination.total, icon: FileText, color: 'text-slate-600 bg-slate-50 border-slate-200' },
+          { label: 'Draft', value: statSummary.draft, icon: Edit2, color: 'text-slate-500 bg-slate-50 border-slate-200' },
+          { label: 'Active', value: statSummary.sent, icon: Send, color: 'text-blue-600 bg-blue-50 border-blue-200' },
+          { label: 'Closed', value: statSummary.closed, icon: CheckCircle2, color: 'text-amber-600 bg-amber-50 border-amber-200' },
+        ].map(({ label, value, icon: Icon, color }) => (
+          <div key={label} className={`flex items-center gap-3 p-4 rounded-xl border ${color}`}>
+            <div className="p-2 rounded-lg bg-white/70 shadow-sm">
+              <Icon size={18} />
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary/10 transition-colors text-sm">
-              <Plus size={16} />
-              add line item
-            </button>
+            <div>
+              <div className="text-xl font-bold">{loading ? '—' : value}</div>
+              <div className="text-xs font-medium opacity-70">{label}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Search + Filter */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-visible">
+        <div className="p-4 border-b border-slate-100 flex gap-3 items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search by title or RFQ number..."
+              className="w-full pl-9 pr-8 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6322ef]/20 focus:border-[#6322ef]"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <X size={14} />
+              </button>
+            )}
           </div>
 
-          {/* Assign Vendors */}
-          <div className="space-y-4">
-            <label className="text-sm font-semibold text-foreground uppercase tracking-wider">Assign Vendors</label>
-            <div className="bg-card border-2 border-border rounded-xl overflow-hidden shadow-sm">
-              <div className="divide-y divide-border/50">
-                {vendors.map(vendor => (
-                  <div key={vendor.id} className="flex items-center justify-between px-4 py-3 bg-foreground/5">
-                    <span className="text-foreground/80 text-sm">{vendor.name}</span>
-                    <button onClick={() => removeVendor(vendor.id)} className="text-foreground/50 hover:text-red-500 transition-colors">
-                      <X size={16} />
-                    </button>
-                  </div>
+          <div className="relative">
+            <Button
+              variant={statusFilter ? 'default' : 'secondary'}
+              onClick={() => setShowFilter(v => !v)}
+            >
+              <Filter size={14} className="mr-1.5" />
+              {statusFilter ? statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1) : 'Filter'}
+              <ChevronDown size={12} className={`ml-1 transition-transform ${showFilter ? 'rotate-180' : ''}`} />
+            </Button>
+            {showFilter && (
+              <div className="absolute right-0 top-full mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-3 space-y-1">
+                <p className="text-xs font-semibold text-slate-500 uppercase px-2 mb-2">Filter by Status</p>
+                {['', 'draft', 'sent', 'closed', 'awarded', 'cancelled'].map(s => (
+                  <button
+                    key={s}
+                    onClick={() => { setStatusFilter(s); setShowFilter(false); }}
+                    className={`w-full text-left px-3 py-1.5 rounded-lg text-sm capitalize transition-colors ${statusFilter === s ? 'bg-[#6322ef] text-white' : 'hover:bg-slate-50 text-slate-700'}`}
+                  >
+                    {s || 'All Statuses'}
+                  </button>
                 ))}
               </div>
+            )}
+          </div>
+
+          <button onClick={() => fetchRFQs(pagination.page)} className="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50 transition-colors" title="Refresh">
+            <RefreshCw size={16} />
+          </button>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="bg-slate-50 text-slate-500 uppercase text-xs font-semibold tracking-wider">
+                <th className="px-6 py-3">RFQ #</th>
+                <th className="px-6 py-3">Title</th>
+                <th className="px-6 py-3">Deadline</th>
+                <th className="px-6 py-3">Status</th>
+                <th className="px-6 py-3 text-center">Items</th>
+                <th className="px-6 py-3 text-center">Vendors</th>
+                <th className="px-6 py-3 text-center">Quotes</th>
+                <th className="px-6 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {loading ? (
+                <tr><td colSpan="8" className="py-16 text-center"><Spinner /></td></tr>
+              ) : error ? (
+                <tr><td colSpan="8" className="py-12 text-center text-red-500 text-sm">{error}</td></tr>
+              ) : rfqs.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="py-16 text-center">
+                    <FileText size={40} className="mx-auto text-slate-200 mb-3" />
+                    <p className="text-slate-400 font-medium">No RFQs found</p>
+                    {!isVendor && (
+                      <button onClick={() => navigate('/rfqs/new')} className="mt-3 text-[#6322ef] text-sm hover:underline">
+                        Create your first RFQ
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ) : (
+                rfqs.map(rfq => (
+                  <tr
+                    key={rfq.id}
+                    className="hover:bg-slate-50 transition-colors group cursor-pointer"
+                    onClick={() => navigate(`/rfqs/${rfq.id}`)}
+                  >
+                    <td className="px-6 py-4">
+                      <span className="font-mono text-xs font-semibold text-[#6322ef] bg-[#6322ef]/10 px-2 py-0.5 rounded">
+                        {rfq.rfq_number}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-slate-900 max-w-xs truncate">{rfq.title}</div>
+                      {rfq.created_by_name && (
+                        <div className="text-xs text-slate-400">{rfq.created_by_name}</div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className={`text-sm font-medium ${isOverdue(rfq.deadline, rfq.status) ? 'text-red-500' : 'text-slate-700'}`}>
+                        {formatDate(rfq.deadline)}
+                      </div>
+                      {isOverdue(rfq.deadline, rfq.status) && (
+                        <div className="text-xs text-red-400 flex items-center gap-1 mt-0.5">
+                          <AlertCircle size={10} /> Overdue
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <StatusBadge status={rfq.status} />
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="text-slate-700 font-semibold">{rfq.total_items}</span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="text-slate-700 font-semibold">{rfq.total_vendors}</span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`font-semibold ${rfq.quotations_received > 0 ? 'text-green-600' : 'text-slate-400'}`}>
+                        {rfq.quotations_received}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4" onClick={e => e.stopPropagation()}>
+                      <div className="flex justify-end items-center gap-1">
+                        <button
+                          onClick={() => navigate(`/rfqs/${rfq.id}`)}
+                          className="p-1.5 rounded text-slate-400 hover:text-[#6322ef] hover:bg-[#6322ef]/10 transition-all"
+                          title="View"
+                        >
+                          <Eye size={15} />
+                        </button>
+                        {!isVendor && rfq.status === 'draft' && (
+                          <button
+                            onClick={() => navigate(`/rfqs/${rfq.id}/edit`)}
+                            className="p-1.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                            title="Edit"
+                          >
+                            <Edit2 size={15} />
+                          </button>
+                        )}
+                        {!isVendor && (rfq.status === 'draft' || rfq.status === 'sent') && (
+                          <button
+                            onClick={() => handleDelete(rfq.id, rfq.rfq_number)}
+                            className="p-1.5 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                            title="Cancel RFQ"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {pagination.pages > 1 && (
+          <div className="px-6 py-4 border-t border-slate-100 flex justify-between items-center text-sm text-slate-500">
+            <span>Page {pagination.page} of {pagination.pages} ({pagination.total} total)</span>
+            <div className="flex gap-2">
+              <Button variant="secondary" size="sm" disabled={pagination.page <= 1} onClick={() => fetchRFQs(pagination.page - 1)}>
+                Previous
+              </Button>
+              <Button variant="secondary" size="sm" disabled={pagination.page >= pagination.pages} onClick={() => fetchRFQs(pagination.page + 1)}>
+                Next
+              </Button>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary/10 transition-colors text-sm">
-              <Plus size={16} />
-              add vendor
-            </button>
           </div>
-
-        </div>
+        )}
       </div>
-
-      {/* Bottom Section */}
-      <div className="pt-8 border-t-2 border-border mt-8 grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 pt-4">
-          <button className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity shadow-sm">
-            <Send size={18} />
-            Save & Send to Vendors
-          </button>
-          <button className="flex items-center justify-center gap-2 px-6 py-3 bg-card border-2 border-border text-foreground rounded-lg font-semibold hover:bg-foreground/5 transition-colors shadow-sm">
-            <Save size={18} />
-            Save as Draft
-          </button>
-        </div>
-
-        {/* Attachments */}
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-foreground">Attachments</label>
-          <div className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-foreground/5 transition-colors cursor-pointer group">
-            <UploadCloud size={32} className="text-foreground/40 mb-3 group-hover:text-primary transition-colors" />
-            <p className="text-foreground/70 text-sm font-medium">Drag & drop files or click to upload</p>
-          </div>
-        </div>
-
-      </div>
-
     </div>
   );
 };
