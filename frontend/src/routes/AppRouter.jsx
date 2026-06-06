@@ -9,9 +9,9 @@ import SignupPage from '../pages/Auth/SignupPage';
 import ForgotPasswordPage from '../pages/Auth/ForgotPasswordPage';
 
 import { Dashboard } from '../pages/Dashboard/Dashboard';
+import { Vendors } from '../pages/Vendors/Vendors';
 
 // Placeholders for other pages
-const Vendors = () => <div>Vendors</div>;
 const RFQs = () => <div>RFQs</div>;
 const Quotations = () => <div>Quotations</div>;
 const Approvals = () => <div>Approvals</div>;
