@@ -23,6 +23,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 from backend.database import Base
 from backend.models import user
+from backend.models import activity
 from backend.config import settings
 target_metadata = Base.metadata
 
