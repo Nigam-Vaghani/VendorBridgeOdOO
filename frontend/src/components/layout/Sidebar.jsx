@@ -20,8 +20,8 @@ export const Sidebar = () => {
   const visibleLinks = allLinks.filter(link => user && link.roles.includes(user.role));
 
   return (
-    <div className="w-64 bg-slate-900 text-slate-300 flex-shrink-0 py-5 flex flex-col">
-      <div className="text-white font-bold text-lg px-6 pb-5 border-b border-slate-800 mb-4">
+    <div className="w-64 bg-primary text-primary-foreground flex-shrink-0 py-5 flex flex-col">
+      <div className="text-primary-foreground font-bold text-lg px-6 pb-5 border-b border-background mb-4">
         🔗 VendorBridge
       </div>
       <nav className="flex-1 px-2 space-y-1">
@@ -30,10 +30,10 @@ export const Sidebar = () => {
             key={link.name}
             to={link.path}
             className={({ isActive }) => 
-              `block px-4 py-2 rounded-md transition-colors ${
+              `block px-4 py-2 rounded-md transition-colors font-medium ${
                 isActive 
-                  ? 'bg-blue-600 text-white' 
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-background text-foreground' 
+                  : 'text-primary-foreground hover:bg-background hover:text-foreground'
               }`
             }
           >

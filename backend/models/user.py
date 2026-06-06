@@ -15,8 +15,13 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(255), nullable=False)
+    first_name = Column(String(100), nullable=False)
+    last_name = Column(String(100), nullable=False)
     email = Column(String(255), unique=True, nullable=False, index=True)
+    phone_number = Column(String(20), nullable=True)
+    country = Column(String(100), nullable=True)
+    additional_info = Column(Text, nullable=True)
+    photo_url = Column(String(255), nullable=True)
     password_hash = Column(Text, nullable=False)
     role = Column(Enum(RoleEnum), nullable=False)
     is_active = Column(Boolean, default=True)
