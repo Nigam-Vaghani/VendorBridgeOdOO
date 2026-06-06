@@ -10,9 +10,9 @@ import ForgotPasswordPage from '../pages/Auth/ForgotPasswordPage';
 
 import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { Vendors } from '../pages/Vendors/Vendors';
+import { RFQs } from '../pages/RFQs/RFQs';
 
 // Placeholders for other pages
-const RFQs = () => <div>RFQs</div>;
 const Quotations = () => <div>Quotations</div>;
 const Approvals = () => <div>Approvals</div>;
 const Unauthorized = () => <div className="p-10 text-red-600">Unauthorized Access</div>;
