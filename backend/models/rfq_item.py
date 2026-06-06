@@ -1,5 +1,6 @@
 import uuid
 from sqlalchemy import Column, String, Text, DateTime, Numeric, ForeignKey, SmallInteger
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from database import Base
@@ -16,3 +17,5 @@ class RFQItem(Base):
     unit = Column(String(50), nullable=False, default="units")
     estimated_unit_price = Column(Numeric(12, 2), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    rfq = relationship("RFQ", back_populates="items")

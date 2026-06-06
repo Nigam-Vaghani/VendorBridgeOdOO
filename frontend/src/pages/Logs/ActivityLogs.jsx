@@ -62,17 +62,13 @@ export const ActivityLogs = () => {
     // Try to fetch from API
     const fetchLogs = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/logs${activeTab !== 'All' ? `?entity_type=${activeTab}` : ''}`);
-        if (!response.ok) throw new Error("Network error");
-        const data = await response.json();
-        if (data && data.length > 0) {
-          setLogs(data);
-        } else {
-          setLogs(MOCK_LOGS.filter(log => activeTab === 'All' || log.entity_type.toLowerCase() === activeTab.toLowerCase()));
-        }
+        const { getActivityLogs } = await import('../../api/procurementApi');
+        const entityType = activeTab === 'All' ? null : activeTab;
+        const data = await getActivityLogs(entityType);
+        setLogs(data || []);
       } catch (error) {
-        console.error("Failed to fetch logs, using mock data", error);
-        setLogs(MOCK_LOGS.filter(log => activeTab === 'All' || log.entity_type.toLowerCase() === activeTab.toLowerCase()));
+        console.error("Failed to fetch logs", error);
+        setLogs([]);
       }
     };
     fetchLogs();

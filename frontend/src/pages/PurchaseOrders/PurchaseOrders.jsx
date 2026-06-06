@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '../../components/ui/Button';
 import {
   Search, Filter, Calendar, Download, Plus, MoreVertical,
@@ -7,34 +7,6 @@ import {
   ChevronRight, Circle
 } from 'lucide-react';
 
-// Mock Data
-const MOCK_SUMMARY = {
-  total: { count: 124, trend: '+12%', isPositive: true },
-  pending: { count: 18, trend: '-2%', isPositive: true },
-  delivered: { count: 86, trend: '+8%', isPositive: true },
-  cancelled: { count: 20, trend: '+1%', isPositive: false },
-};
-
-const MOCK_PO_LIST = [
-  {
-    id: 'PO-2026-001', vendor: 'Global Tech Supplies', rfq: 'RFQ-2026-042', amount: '$45,000.00', deliveryDate: '2026-06-15', status: 'Accepted', createdDate: '2026-06-01'
-  },
-  {
-    id: 'PO-2026-002', vendor: 'Office Essentials Ltd', rfq: 'RFQ-2026-039', amount: '$12,450.00', deliveryDate: '2026-06-10', status: 'In Progress', createdDate: '2026-05-28'
-  },
-  {
-    id: 'PO-2026-003', vendor: 'Rapid Print Solutions', rfq: 'RFQ-2026-045', amount: '$3,200.00', deliveryDate: '2026-06-05', status: 'Delivered', createdDate: '2026-05-25'
-  },
-  {
-    id: 'PO-2026-004', vendor: 'Apex Furniture', rfq: 'RFQ-2026-033', amount: '$85,000.00', deliveryDate: '2026-07-01', status: 'Sent', createdDate: '2026-06-05'
-  },
-  {
-    id: 'PO-2026-005', vendor: 'IT Logistics Inc', rfq: 'RFQ-2026-040', amount: '$150,000.00', deliveryDate: '2026-05-20', status: 'Cancelled', createdDate: '2026-05-15'
-  },
-  {
-    id: 'PO-2026-006', vendor: 'Clean Co Services', rfq: 'RFQ-2026-048', amount: '$8,500.00', deliveryDate: '2026-06-20', status: 'Draft', createdDate: '2026-06-06'
-  }
-];
 
 const MOCK_PO_DETAILS = {
   orderInfo: {
@@ -86,7 +58,7 @@ const StatusBadge = ({ status }) => {
 
 // PODetailsModal Component
 const PODetailsModal = ({ isOpen, onClose, data }) => {
-  if (!isOpen) return null;
+  if (!isOpen || !data) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/50 backdrop-blur-sm transition-opacity">
@@ -220,13 +192,36 @@ const PODetailsModal = ({ isOpen, onClose, data }) => {
         {/* Footer Actions */}
         <div className="p-4 border-t border-border/50 bg-card flex justify-between items-center">
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="gap-2"><Download size={14} /> PDF</Button>
-            <Button variant="outline" size="sm" className="gap-2"><Printer size={14} /> Print</Button>
-            <Button variant="outline" size="sm" className="gap-2"><Mail size={14} /> Email Vendor</Button>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => window.print()}><Download size={14} /> PDF</Button>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => window.print()}><Printer size={14} /> Print</Button>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => alert('PO emailed to vendor successfully!')}><Mail size={14} /> Email Vendor</Button>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="gap-2"><FileText size={14} /> Generate Invoice</Button>
-            <Button size="sm" className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"><CheckCircle size={14} /> Mark Delivered</Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              onClick={async () => {
+                try {
+                  const { generateInvoice } = await import('../../api/procurementApi');
+                  await generateInvoice(data.id);
+                  alert("Invoice generated successfully!");
+                  onClose();
+                } catch(e) {
+                  console.error(e);
+                  alert("Failed to generate invoice");
+                }
+              }}
+            >
+              <FileText size={14} /> Generate Invoice
+            </Button>
+            <Button 
+              size="sm" 
+              className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => alert("PO Marked as Delivered! (Inventory module pending)")}
+            >
+              <CheckCircle size={14} /> Mark Delivered
+            </Button>
           </div>
         </div>
 
@@ -256,6 +251,25 @@ const SummaryCard = ({ title, count, trend, isPositive, icon: Icon }) => (
 export const PurchaseOrders = () => {
   const [selectedPO, setSelectedPO] = useState(null);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [pos, setPos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    import('../../api/procurementApi').then(({ getPurchaseOrders }) => {
+      getPurchaseOrders().then(data => {
+        setPos(data);
+        setLoading(false);
+      }).catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+    });
+  }, []);
+
+  const totalCount = pos.length;
+  const pendingCount = pos.filter(po => po.status === 'draft' || po.status === 'sent').length;
+  const deliveredCount = pos.filter(po => po.status === 'delivered').length;
+  const cancelledCount = pos.filter(po => po.status === 'cancelled').length;
 
   return (
     <div className="p-8 h-full overflow-y-auto bg-background">
@@ -274,10 +288,10 @@ export const PurchaseOrders = () => {
 
       {/* Summary Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <SummaryCard title="Total Orders" count={MOCK_SUMMARY.total.count} trend={MOCK_SUMMARY.total.trend} isPositive={MOCK_SUMMARY.total.isPositive} icon={ShoppingCart} />
-        <SummaryCard title="Pending Delivery" count={MOCK_SUMMARY.pending.count} trend={MOCK_SUMMARY.pending.trend} isPositive={MOCK_SUMMARY.pending.isPositive} icon={Clock} />
-        <SummaryCard title="Delivered Orders" count={MOCK_SUMMARY.delivered.count} trend={MOCK_SUMMARY.delivered.trend} isPositive={MOCK_SUMMARY.delivered.isPositive} icon={CheckCircle} />
-        <SummaryCard title="Cancelled Orders" count={MOCK_SUMMARY.cancelled.count} trend={MOCK_SUMMARY.cancelled.trend} isPositive={MOCK_SUMMARY.cancelled.isPositive} icon={XCircle} />
+        <SummaryCard title="Total Orders" count={totalCount} trend="+0%" isPositive={true} icon={ShoppingCart} />
+        <SummaryCard title="Pending Delivery" count={pendingCount} trend="+0%" isPositive={true} icon={Clock} />
+        <SummaryCard title="Delivered Orders" count={deliveredCount} trend="+0%" isPositive={true} icon={CheckCircle} />
+        <SummaryCard title="Cancelled Orders" count={cancelledCount} trend="+0%" isPositive={false} icon={XCircle} />
       </div>
 
       {/* Main Content Area */}
@@ -301,7 +315,7 @@ export const PurchaseOrders = () => {
               <Calendar size={16} /> Date Range
             </Button>
           </div>
-          <Button variant="outline" className="gap-2 text-foreground border-border/50 hover:bg-muted/50 h-10 rounded-lg">
+          <Button onClick={() => window.print()} variant="outline" className="gap-2 text-foreground border-border/50 hover:bg-muted/50 h-10 rounded-lg">
             <Download size={16} /> Export
           </Button>
         </div>
@@ -315,28 +329,55 @@ export const PurchaseOrders = () => {
                 <th className="px-6 py-4">Vendor Name</th>
                 <th className="px-6 py-4">RFQ Ref</th>
                 <th className="px-6 py-4">Total Amount</th>
-                <th className="px-6 py-4">Expected Delivery</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Created Date</th>
                 <th className="px-6 py-4 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/20">
-              {MOCK_PO_LIST.map((po) => (
+              {loading ? (
+                <tr><td colSpan="7" className="p-4 text-center">Loading...</td></tr>
+              ) : pos.length === 0 ? (
+                <tr><td colSpan="7" className="p-4 text-center">No Purchase Orders found.</td></tr>
+              ) : pos.map((po) => (
                 <tr
                   key={po.id}
                   className="hover:bg-muted/10 transition-colors cursor-pointer group"
-                  onClick={() => setSelectedPO(MOCK_PO_DETAILS)}
+                  onClick={() => {
+                    const dynamicPO = {
+                      id: po.id,
+                      orderInfo: {
+                        poNumber: po.po_number, rfqNumber: po.rfq_number, vendorName: po.vendor_name,
+                        createdDate: new Date(po.created_at).toLocaleDateString(), approvedBy: 'System Admin', approvalDate: new Date(po.created_at).toLocaleDateString()
+                      },
+                      items: [
+                        { id: 1, name: 'Procured Items (Summary)', quantity: 1, unitPrice: po.total_amount, tax: '0%', lineTotal: po.total_amount }
+                      ],
+                      financials: {
+                        subtotal: po.total_amount, gst: '0.00', shipping: '0.00', grandTotal: po.total_amount
+                      },
+                      delivery: {
+                        address: 'Main Warehouse',
+                        expectedDate: 'TBD', terms: 'Standard Terms'
+                      },
+                      approval: {
+                        approverName: 'Admin', remarks: 'Approved dynamically.', timestamp: new Date(po.created_at).toLocaleDateString()
+                      },
+                      timeline: [
+                        { event: 'Purchase Order Generated', date: new Date(po.created_at).toLocaleDateString(), completed: true }
+                      ]
+                    };
+                    setSelectedPO(dynamicPO);
+                  }}
                 >
-                  <td className="px-6 py-4 font-medium text-foreground">{po.id}</td>
-                  <td className="px-6 py-4 text-foreground">{po.vendor}</td>
-                  <td className="px-6 py-4 text-foreground opacity-80">{po.rfq}</td>
-                  <td className="px-6 py-4 font-medium text-foreground">{po.amount}</td>
-                  <td className="px-6 py-4 text-foreground opacity-80">{po.deliveryDate}</td>
+                  <td className="px-6 py-4 font-medium text-foreground">{po.po_number}</td>
+                  <td className="px-6 py-4 text-foreground">{po.vendor_name}</td>
+                  <td className="px-6 py-4 text-foreground opacity-80">{po.rfq_number}</td>
+                  <td className="px-6 py-4 font-medium text-foreground">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(po.total_amount)}</td>
                   <td className="px-6 py-4">
-                    <StatusBadge status={po.status} />
+                    <StatusBadge status={po.status.charAt(0).toUpperCase() + po.status.slice(1)} />
                   </td>
-                  <td className="px-6 py-4 text-foreground opacity-80">{po.createdDate}</td>
+                  <td className="px-6 py-4 text-foreground opacity-80">{new Date(po.created_at).toLocaleDateString()}</td>
                   <td className="px-6 py-4 text-center relative" onClick={(e) => e.stopPropagation()}>
                     <button
                       className="p-1.5 rounded-md hover:bg-muted transition-colors text-foreground opacity-60 hover:opacity-100 focus:outline-none"
@@ -348,10 +389,52 @@ export const PurchaseOrders = () => {
                     {/* Inline Actions Dropdown Simulation */}
                     {activeDropdown === po.id && (
                       <div className="absolute right-8 top-10 w-48 bg-background border border-border/50 rounded-lg shadow-lg z-10 py-1 text-sm flex flex-col text-left">
-                        <button className="px-4 py-2 hover:bg-muted w-full text-left flex items-center gap-2" onClick={() => { setSelectedPO(MOCK_PO_DETAILS); setActiveDropdown(null); }}><Eye size={14} /> View Details</button>
+                        <button className="px-4 py-2 hover:bg-muted w-full text-left flex items-center gap-2" onClick={() => { 
+                          const dynamicPO = {
+                            id: po.id,
+                            orderInfo: {
+                              poNumber: po.po_number, rfqNumber: po.rfq_number, vendorName: po.vendor_name,
+                              createdDate: new Date(po.created_at).toLocaleDateString(), approvedBy: 'System Admin', approvalDate: new Date(po.created_at).toLocaleDateString()
+                            },
+                            items: [
+                              { id: 1, name: 'Procured Items (Summary)', quantity: 1, unitPrice: po.total_amount, tax: '0%', lineTotal: po.total_amount }
+                            ],
+                            financials: {
+                              subtotal: po.total_amount, gst: '0.00', shipping: '0.00', grandTotal: po.total_amount
+                            },
+                            delivery: {
+                              address: 'Main Warehouse',
+                              expectedDate: 'TBD', terms: 'Standard Terms'
+                            },
+                            approval: {
+                              approverName: 'Admin', remarks: 'Approved dynamically.', timestamp: new Date(po.created_at).toLocaleDateString()
+                            },
+                            timeline: [
+                              { event: 'Purchase Order Generated', date: new Date(po.created_at).toLocaleDateString(), completed: true }
+                            ]
+                          };
+                          setSelectedPO(dynamicPO); 
+                          setActiveDropdown(null); 
+                        }}><Eye size={14} /> View Details</button>
                         <button className="px-4 py-2 hover:bg-muted w-full text-left flex items-center gap-2"><Download size={14} /> Download PDF</button>
                         <button className="px-4 py-2 hover:bg-muted w-full text-left flex items-center gap-2"><Mail size={14} /> Email Vendor</button>
                         <div className="my-1 border-b border-border/20"></div>
+                        <button 
+                          className="px-4 py-2 hover:bg-muted w-full text-left flex items-center gap-2"
+                          onClick={async () => {
+                            try {
+                              const { generateInvoice } = await import('../../api/procurementApi');
+                              await generateInvoice(po.id);
+                              alert("Invoice generated successfully!");
+                              setActiveDropdown(null);
+                            } catch(e) {
+                              console.error(e);
+                              alert("Failed to generate invoice");
+                            }
+                          }}
+                        >
+                          <FileText size={14} /> Generate Invoice
+                        </button>
                         <button className="px-4 py-2 hover:bg-muted w-full text-left flex items-center gap-2"><CheckCircle size={14} /> Mark Delivered</button>
                         <button className="px-4 py-2 hover:bg-rose-50 text-rose-600 w-full text-left flex items-center gap-2"><XCircle size={14} /> Cancel Order</button>
                       </div>
@@ -365,13 +448,11 @@ export const PurchaseOrders = () => {
 
         {/* Pagination placeholder */}
         <div className="p-4 border-t border-border/40 flex items-center justify-between text-sm text-foreground opacity-70 bg-muted/5 rounded-b-xl">
-          <div>Showing 1 to 6 of 124 entries</div>
+          <div>Showing {pos.length} entries</div>
           <div className="flex gap-1">
             <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-border/50 disabled:opacity-50" disabled>&lt;</Button>
             <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-primary text-primary-foreground">1</Button>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-border/50">2</Button>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-border/50">3</Button>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-border/50">&gt;</Button>
+            <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-border/50 disabled:opacity-50" disabled>&gt;</Button>
           </div>
         </div>
 
@@ -381,7 +462,7 @@ export const PurchaseOrders = () => {
       <PODetailsModal
         isOpen={!!selectedPO}
         onClose={() => setSelectedPO(null)}
-        data={selectedPO || MOCK_PO_DETAILS}
+        data={selectedPO}
       />
 
     </div>

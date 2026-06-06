@@ -1,20 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Plus, Eye, Filter } from 'lucide-react';
+import { getVendors } from '../../api/procurementApi';
 
 export const Vendors = () => {
   const [activeTab, setActiveTab] = useState('All');
+  const [vendorsData, setVendorsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        const data = await getVendors();
+        setVendorsData(data);
+      } catch (error) {
+        console.error("Error fetching vendors:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVendors();
+  }, []);
 
   const tabs = [
-    { name: 'All', count: 28 },
-    { name: 'Active', count: 21 },
-    { name: 'Pending', count: 4 },
-    { name: 'Blocked', count: 3 },
-  ];
-
-  const vendorsData = [
-    { id: 1, name: 'Infra Supplies Pvt ltd', category: 'Constructions', gst: '27AABCS1429Bz0', contact: '+91 9876543210', status: 'Active' },
-    { id: 2, name: 'Tech Core LTD', category: 'IT', gst: '27AABCS1429Bz0', contact: '+91 9876543211', status: 'Active' },
-    { id: 3, name: 'Furniture Co...', category: 'Furniture', gst: '27AABCS1429Bz0', contact: '+91 9876543212', status: 'Blocked' },
+    { name: 'All', count: vendorsData.length },
+    { name: 'Active', count: vendorsData.filter(v => v.status.toLowerCase() === 'active').length },
+    { name: 'Pending', count: vendorsData.filter(v => v.status.toLowerCase() === 'pending').length },
+    { name: 'Blocked', count: vendorsData.filter(v => v.status.toLowerCase() === 'blocked').length },
   ];
 
   const getStatusColor = (status) => {
@@ -41,7 +52,10 @@ export const Vendors = () => {
             Manage your vendors and registrations
           </p>
         </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-card border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-colors shadow-sm whitespace-nowrap">
+        <button 
+          onClick={() => alert("Vendors must self-register via the vendor portal or registration page.")}
+          className="flex items-center gap-2 px-6 py-3 bg-card border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-colors shadow-sm whitespace-nowrap"
+        >
           <Plus size={20} />
           Add Vendor
         </button>
@@ -98,8 +112,8 @@ export const Vendors = () => {
                   <tr key={vendor.id} className="hover:bg-foreground/5 transition-colors">
                     <td className="px-6 py-4 text-foreground font-medium">{vendor.name}</td>
                     <td className="px-6 py-4 text-foreground/80">{vendor.category}</td>
-                    <td className="px-6 py-4 text-foreground/80 font-mono">{vendor.gst}</td>
-                    <td className="px-6 py-4 text-foreground/80 font-mono">{vendor.contact}</td>
+                    <td className="px-6 py-4 text-foreground/80 font-mono">{vendor.gst_number || '-'}</td>
+                    <td className="px-6 py-4 text-foreground/80 font-mono">{vendor.phone}</td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusColor(vendor.status)}`}>
                         {vendor.status}

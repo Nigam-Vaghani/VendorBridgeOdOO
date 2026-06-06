@@ -6,34 +6,34 @@
 -- ENUMS
 -- ----------------------------------------------------------------------------
 DROP TYPE IF EXISTS user_role CASCADE;
-CREATE TYPE user_role AS ENUM ("admin", "procurement_officer", "vendor", "manager");
+CREATE TYPE user_role AS ENUM ('admin', 'procurement_officer', 'vendor', 'manager');
 
 DROP TYPE IF EXISTS vendor_status CASCADE;
-CREATE TYPE vendor_status AS ENUM ("active", "inactive", "pending", "blacklisted");
+CREATE TYPE vendor_status AS ENUM ('active', 'inactive', 'pending', 'blacklisted');
 
 DROP TYPE IF EXISTS rfq_status CASCADE;
-CREATE TYPE rfq_status AS ENUM ("draft", "sent", "closed", "cancelled", "awarded");
+CREATE TYPE rfq_status AS ENUM ('draft', 'sent', 'closed', 'cancelled', 'awarded');
 
 DROP TYPE IF EXISTS quotation_status CASCADE;
-CREATE TYPE quotation_status AS ENUM ("submitted", "under_review", "shortlisted", "rejected", "accepted", "withdrawn");
+CREATE TYPE quotation_status AS ENUM ('submitted', 'under_review', 'shortlisted', 'rejected', 'accepted', 'withdrawn');
 
 DROP TYPE IF EXISTS approval_status CASCADE;
-CREATE TYPE approval_status AS ENUM ("pending", "approved", "rejected", "escalated");
+CREATE TYPE approval_status AS ENUM ('pending', 'approved', 'rejected', 'escalated');
 
 DROP TYPE IF EXISTS approval_request_type CASCADE;
-CREATE TYPE approval_request_type AS ENUM ("rfq", "quotation", "purchase_order");
+CREATE TYPE approval_request_type AS ENUM ('rfq', 'quotation', 'purchase_order');
 
 DROP TYPE IF EXISTS po_status CASCADE;
-CREATE TYPE po_status AS ENUM ("draft", "pending_approval", "approved", "sent", "acknowledged", "completed", "cancelled");
+CREATE TYPE po_status AS ENUM ('draft', 'pending_approval', 'approved', 'sent', 'acknowledged', 'completed', 'cancelled');
 
 DROP TYPE IF EXISTS invoice_status CASCADE;
-CREATE TYPE invoice_status AS ENUM ("draft", "issued", "sent", "paid", "overdue", "cancelled");
+CREATE TYPE invoice_status AS ENUM ('draft', 'issued', 'sent', 'paid', 'overdue', 'cancelled');
 
 DROP TYPE IF EXISTS notification_type CASCADE;
-CREATE TYPE notification_type AS ENUM ("info", "success", "warning", "error", "approval_request", "approval_decision", "rfq_invite", "quotation_received", "po_issued", "invoice_issued");
+CREATE TYPE notification_type AS ENUM ('info', 'success', 'warning', 'error', 'approval_request', 'approval_decision', 'rfq_invite', 'quotation_received', 'po_issued', 'invoice_issued');
 
 DROP TYPE IF EXISTS doc_type CASCADE;
-CREATE TYPE doc_type AS ENUM ("gst_certificate", "pan_card", "registration_certificate", "other");
+CREATE TYPE doc_type AS ENUM ('gst_certificate', 'pan_card', 'registration_certificate', 'other');
 
 -- ----------------------------------------------------------------------------
 -- HELPER FUNCTION: auto-update updated_at
@@ -56,7 +56,7 @@ CREATE TABLE users (
     email           VARCHAR(255) NOT NULL,
     password_hash   TEXT NOT NULL,
     role            user_role NOT NULL,
-    vendor_id       UUID NULL REFERENCES vendors(id) ON DELETE SET NULL,
+    vendor_id       UUID NULL,
     is_active       BOOLEAN NOT NULL DEFAULT TRUE,
     last_login_at   TIMESTAMPTZ NULL,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -106,8 +106,8 @@ CREATE TABLE vendors (
     city                VARCHAR(100) NULL,
     state               VARCHAR(100) NULL,
     pincode             VARCHAR(20) NULL,
-    country             VARCHAR(100) NOT NULL DEFAULT "India",
-    status              vendor_status NOT NULL DEFAULT "active",
+    country             VARCHAR(100) NOT NULL DEFAULT 'India',
+    status              vendor_status NOT NULL DEFAULT 'active',
     rating              NUMERIC(3,2) NOT NULL DEFAULT 0.00,
     total_orders        INTEGER NOT NULL DEFAULT 0,
     on_time_delivery_pct NUMERIC(5,2) NOT NULL DEFAULT 0.00,
@@ -149,7 +149,7 @@ CREATE TABLE rfqs (
     title           VARCHAR(255) NOT NULL,
     description     TEXT NULL,
     deadline        TIMESTAMPTZ NOT NULL,
-    status          rfq_status NOT NULL DEFAULT "draft",
+    status          rfq_status NOT NULL DEFAULT 'draft',
     terms           TEXT NULL,
     created_by      UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
     sent_at         TIMESTAMPTZ NULL,
@@ -175,7 +175,7 @@ CREATE TABLE rfq_items (
     product_name        VARCHAR(255) NOT NULL,
     description         TEXT NULL,
     quantity            NUMERIC(12,3) NOT NULL,
-    unit                VARCHAR(50) NOT NULL DEFAULT "units",
+    unit                VARCHAR(50) NOT NULL DEFAULT 'units',
     estimated_unit_price NUMERIC(12,2) NULL,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -210,7 +210,7 @@ CREATE TABLE quotations (
     delivery_days       SMALLINT NOT NULL,
     validity_days       SMALLINT NOT NULL DEFAULT 30,
     notes               TEXT NULL,
-    status              quotation_status NOT NULL DEFAULT "submitted",
+    status              quotation_status NOT NULL DEFAULT 'submitted',
     submitted_by        UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
     submitted_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -251,7 +251,7 @@ CREATE TABLE approval_requests (
     request_type    approval_request_type NOT NULL,
     entity_id       UUID NOT NULL,
     requester_id    UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
-    status          approval_status NOT NULL DEFAULT "pending",
+    status          approval_status NOT NULL DEFAULT 'pending',
     remarks         TEXT NULL,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     resolved_at     TIMESTAMPTZ NULL
@@ -269,7 +269,7 @@ CREATE TABLE approval_steps (
     request_id      UUID NOT NULL REFERENCES approval_requests(id) ON DELETE CASCADE,
     step_order      SMALLINT NOT NULL DEFAULT 1,
     approver_id     UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
-    action          approval_status NOT NULL DEFAULT "pending",
+    action          approval_status NOT NULL DEFAULT 'pending',
     remarks         TEXT NULL,
     decided_at      TIMESTAMPTZ NULL,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -287,7 +287,7 @@ CREATE TABLE purchase_orders (
     po_number               VARCHAR(50) NOT NULL UNIQUE,
     quotation_id            UUID NOT NULL UNIQUE REFERENCES quotations(id) ON DELETE RESTRICT,
     vendor_id               UUID NOT NULL REFERENCES vendors(id) ON DELETE RESTRICT,
-    status                  po_status NOT NULL DEFAULT "draft",
+    status                  po_status NOT NULL DEFAULT 'draft',
     subtotal                NUMERIC(12,2) NOT NULL,
     discount_amount         NUMERIC(12,2) NOT NULL DEFAULT 0.00,
     tax_rate                NUMERIC(5,2) NOT NULL DEFAULT 18.00,
@@ -337,7 +337,7 @@ CREATE TABLE invoices (
     subtotal            NUMERIC(12,2) NOT NULL,
     tax_amount          NUMERIC(12,2) NOT NULL,
     total               NUMERIC(12,2) NOT NULL,
-    status              invoice_status NOT NULL DEFAULT "draft",
+    status              invoice_status NOT NULL DEFAULT 'draft',
     due_date            DATE NULL,
     pdf_url             VARCHAR(500) NULL,
     emailed_to          VARCHAR(255) NULL,
@@ -393,3 +393,6 @@ CREATE TABLE notifications (
 
 CREATE INDEX idx_notif_user_read_created ON notifications(user_id, is_read, created_at DESC);
 CREATE INDEX idx_notif_user_type ON notifications(user_id, type);
+
+-- Add foreign key constraint to users table for vendor_id
+ALTER TABLE users ADD CONSTRAINT fk_users_vendor_id FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE SET NULL;

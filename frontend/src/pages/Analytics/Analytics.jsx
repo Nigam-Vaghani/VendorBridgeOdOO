@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Users, FileText, CheckCircle, DollarSign, Clock, Receipt, 
   Download, ArrowUpRight, ArrowDownRight, Award, PieChart as PieChartIcon,
@@ -29,22 +29,7 @@ const SPEND_DATA = [
   { name: 'Nov', spend: 165000 }, { name: 'Dec', spend: 180000 },
 ];
 
-const CATEGORY_DATA = [
-  { name: 'Electronics', value: 400 },
-  { name: 'Office Supplies', value: 300 },
-  { name: 'Software', value: 300 },
-  { name: 'Services', value: 200 },
-  { name: 'Other', value: 100 },
-];
-
 const COLORS = ['#004643', '#f9bc60', '#e16162', '#3da9fc', '#90b4ce'];
-
-const VENDOR_PERFORMANCE = [
-  { id: 1, name: 'Global Tech Supplies', rfqs: 45, won: 32, rate: '71%', avgTime: '3 Days', rating: 4.8 },
-  { id: 2, name: 'Office Essentials Ltd', rfqs: 60, won: 25, rate: '41%', avgTime: '5 Days', rating: 4.2 },
-  { id: 3, name: 'Rapid Print Solutions', rfqs: 20, won: 18, rate: '90%', avgTime: '2 Days', rating: 4.9 },
-  { id: 4, name: 'Apex Furniture', rfqs: 15, won: 5, rate: '33%', avgTime: '10 Days', rating: 3.5 },
-];
 
 // Reusable Components
 const MetricCard = ({ title, value, trend, isPositive, prevMonth, icon: Icon }) => (
@@ -77,9 +62,33 @@ const ExportButton = ({ label }) => {
       </Button>
       {open && (
         <div className="absolute top-full left-0 mt-1 w-full bg-background border border-border rounded-lg shadow-lg z-10 py-1 flex flex-col">
-          <button className="text-left px-4 py-2 text-sm hover:bg-muted" onClick={() => setOpen(false)}>Export as PDF</button>
-          <button className="text-left px-4 py-2 text-sm hover:bg-muted" onClick={() => setOpen(false)}>Export as Excel</button>
-          <button className="text-left px-4 py-2 text-sm hover:bg-muted" onClick={() => setOpen(false)}>Export as CSV</button>
+          <button 
+            className="text-left px-4 py-2 text-sm hover:bg-muted" 
+            onClick={() => {
+              setOpen(false);
+              window.print();
+            }}
+          >
+            Export as PDF
+          </button>
+          <button 
+            className="text-left px-4 py-2 text-sm hover:bg-muted" 
+            onClick={() => {
+              setOpen(false);
+              alert('Exporting as Excel... (Mock)');
+            }}
+          >
+            Export as Excel
+          </button>
+          <button 
+            className="text-left px-4 py-2 text-sm hover:bg-muted" 
+            onClick={() => {
+              setOpen(false);
+              alert('Exporting as CSV... (Mock)');
+            }}
+          >
+            Export as CSV
+          </button>
         </div>
       )}
     </div>
@@ -100,6 +109,25 @@ const InsightCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
 );
 
 export const Analytics = () => {
+  const [analyticsData, setAnalyticsData] = useState(null);
+
+  useEffect(() => {
+    import('../../api/procurementApi').then(({ getFullAnalytics }) => {
+      getFullAnalytics().then(res => setAnalyticsData(res)).catch(console.error);
+    });
+  }, []);
+
+  if (!analyticsData) return <div className="p-8 text-center text-foreground">Loading Analytics...</div>;
+
+  const dynamicKPIs = [
+    { id: 1, title: 'Total Vendors', value: analyticsData.kpis.total_vendors.toString(), trend: '+0%', isPositive: true, prevMonth: '-', icon: Users },
+    { id: 2, title: 'Active RFQs', value: analyticsData.kpis.active_rfqs.toString(), trend: '+0%', isPositive: true, prevMonth: '-', icon: FileText },
+    { id: 3, title: 'Approved POs', value: analyticsData.kpis.approved_pos.toString(), trend: '-0%', isPositive: true, prevMonth: '-', icon: CheckCircle },
+    { id: 4, title: 'Procurement Spend', value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact' }).format(analyticsData.kpis.total_spend), trend: '+0%', isPositive: true, prevMonth: '-', icon: DollarSign },
+    { id: 5, title: 'Pending Approvals', value: analyticsData.kpis.pending_approvals.toString(), trend: '-0%', isPositive: false, prevMonth: '-', icon: Clock },
+    { id: 6, title: 'Generated Invoices', value: analyticsData.kpis.generated_invoices.toString(), trend: '+0%', isPositive: true, prevMonth: '-', icon: Receipt },
+  ];
+
   return (
     <div className="p-8 h-full overflow-y-auto bg-background">
       
@@ -111,7 +139,7 @@ export const Analytics = () => {
 
       {/* Top KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
-        {MOCK_KPIS.map(kpi => <MetricCard key={kpi.id} {...kpi} />)}
+        {dynamicKPIs.map(kpi => <MetricCard key={kpi.id} {...kpi} />)}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
@@ -126,7 +154,7 @@ export const Analytics = () => {
             </h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={SPEND_DATA} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <LineChart data={analyticsData.spend_data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.4} />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--foreground)', opacity: 0.7, fontSize: 12}} dy={10} />
                   <YAxis tickFormatter={(val) => `$${val/1000}k`} axisLine={false} tickLine={false} tick={{fill: 'var(--foreground)', opacity: 0.7, fontSize: 12}} dx={-10} />
@@ -161,7 +189,7 @@ export const Analytics = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/20">
-                    {VENDOR_PERFORMANCE.map(vendor => (
+                    {analyticsData.vendor_performance.map(vendor => (
                       <tr key={vendor.id} className="hover:bg-muted/10">
                         <td className="px-6 py-4 font-medium text-foreground">{vendor.name}</td>
                         <td className="px-6 py-4 text-center text-foreground">{vendor.rfqs}</td>
@@ -193,7 +221,7 @@ export const Analytics = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={CATEGORY_DATA}
+                    data={analyticsData.category_data}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -202,7 +230,7 @@ export const Analytics = () => {
                     dataKey="value"
                     stroke="none"
                   >
-                    {CATEGORY_DATA.map((entry, index) => (
+                    {analyticsData.category_data.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>

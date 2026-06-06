@@ -37,7 +37,14 @@ const SignupPage = () => {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.detail || 'Signup failed');
+      const detail = err.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        setError(detail.map(d => `${d.loc?.join('.')}: ${d.msg}`).join(', '));
+      } else if (typeof detail === 'string') {
+        setError(detail);
+      } else {
+        setError('Signup failed');
+      }
     }
   };
 

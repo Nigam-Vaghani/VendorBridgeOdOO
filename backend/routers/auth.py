@@ -13,12 +13,26 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def signup(request: SignupRequest, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == request.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
+    vendor_id = request.vendor_id
+    if request.role.value == "vendor" and not vendor_id:
+        from models.vendor import Vendor
+        new_vendor = Vendor(
+            name=request.name + " Company",
+            category="General",
+            contact_person=request.name,
+            email=request.email,
+            phone="0000000000"
+        )
+        db.add(new_vendor)
+        db.flush() # get id without committing
+        vendor_id = new_vendor.id
+
     user = User(
         name=request.name,
         email=request.email,
         password_hash=hash_password(request.password),
         role=request.role,
-        vendor_id=request.vendor_id
+        vendor_id=vendor_id
     )
     db.add(user)
     db.commit()
