@@ -2,6 +2,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { Sun, Moon } from 'lucide-react';
+import { NotificationDropdown } from './NotificationDropdown';
 
 export const Navbar = () => {
   const { user, logoutUser } = useAuth();
@@ -26,12 +27,7 @@ export const Navbar = () => {
         >
           {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
         </button>
-        <div className="relative cursor-pointer text-foreground">
-          <span>🔔</span>
-          <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] rounded-full px-1.5 py-0.5 font-bold">
-            0
-          </span>
-        </div>
+        <NotificationDropdown />
         <div className="flex items-center gap-3 ml-4 border-l border-primary pl-4">
           <div className="text-right">
             <div className="text-sm font-semibold text-foreground">{user?.name}</div>

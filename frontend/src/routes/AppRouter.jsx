@@ -17,6 +17,7 @@ import { Approvals } from '../pages/Approvals/Approvals';
 import { Invoices } from '../pages/Invoices/Invoices';
 import { ActivityLogs } from '../pages/Logs/ActivityLogs';
 import { PurchaseOrders } from '../pages/PurchaseOrders/PurchaseOrders';
+import { Analytics } from '../pages/Analytics/Analytics';
 
 // Placeholders for other pages
 const Unauthorized = () => <div className="p-10 text-red-600">Unauthorized Access</div>;
@@ -57,7 +58,7 @@ export const AppRouter = () => {
           </Route>
 
           <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER]} />}>
-            <Route path="/analytics" element={<div>Analytics</div>} />
+            <Route path="/analytics" element={<Analytics />} />
             <Route path="/logs" element={<ActivityLogs />} />
           </Route>
         </Route>
