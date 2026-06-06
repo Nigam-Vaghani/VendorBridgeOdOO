@@ -34,30 +34,24 @@ export const AppRouter = () => {
         <Route element={<AppLayout />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-          <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER]} />}>
+          <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER, ROLES.VENDOR]} />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/vendors" element={<Vendors />} />
-          </Route>
-
-          <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.VENDOR]} />}>
             <Route path="/rfqs" element={<RFQs />} />
             <Route path="/purchase-orders" element={<PurchaseOrders />} />
             <Route path="/invoices" element={<Invoices />} />
           </Route>
 
-          <Route element={<RoleRoute roles={[ROLES.OFFICER, ROLES.VENDOR]} />}>
+          <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER]} />}>
+            <Route path="/vendors" element={<Vendors />} />
+          </Route>
+
+          <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.VENDOR]} />}>
             <Route path="/quotations" element={<Quotations />} />
           </Route>
 
           <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER]} />}>
             <Route path="/compare-quotes" element={<QuotationComparison />} />
-          </Route>
-
-          <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER]} />}>
             <Route path="/approvals" element={<Approvals />} />
-          </Route>
-
-          <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER]} />}>
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/logs" element={<ActivityLogs />} />
           </Route>

@@ -18,14 +18,14 @@ export const Sidebar = () => {
   const { user } = useAuth();
 
   const allLinks = [
-    { name: 'Dashboard', path: '/dashboard', roles: [ROLES.ADMIN, ROLES.OFFICER], icon: LayoutDashboard },
+    { name: 'Dashboard', path: '/dashboard', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER, ROLES.VENDOR], icon: LayoutDashboard },
     { name: 'Vendors', path: '/vendors', roles: [ROLES.ADMIN, ROLES.OFFICER], icon: Users },
-    { name: 'RFQs', path: '/rfqs', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.VENDOR], icon: FileText },
-    { name: 'Quotations', path: '/quotations', roles: [ROLES.OFFICER, ROLES.VENDOR], icon: FileSignature },
-    { name: 'Compare Quotes', path: '/compare-quotes', roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OFFICER], icon: GitCompare },
+    { name: 'RFQs', path: '/rfqs', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER, ROLES.VENDOR], icon: FileText },
+    { name: 'Quotations', path: '/quotations', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.VENDOR], icon: FileSignature },
+    { name: 'Compare Quotes', path: '/compare-quotes', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER], icon: GitCompare },
     { name: 'Approvals', path: '/approvals', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER], icon: CheckSquare },
-    { name: 'Purchase Orders', path: '/purchase-orders', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.VENDOR], icon: ShoppingCart },
-    { name: 'Invoices', path: '/invoices', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.VENDOR], icon: Receipt },
+    { name: 'Purchase Orders', path: '/purchase-orders', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER, ROLES.VENDOR], icon: ShoppingCart },
+    { name: 'Invoices', path: '/invoices', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER, ROLES.VENDOR], icon: Receipt },
     { name: 'Analytics', path: '/analytics', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER], icon: PieChart },
     { name: 'Activity Logs', path: '/logs', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER], icon: Activity },
   ];
