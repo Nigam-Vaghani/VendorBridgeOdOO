@@ -113,7 +113,7 @@ If you are a judge or organizer evaluating this platform, please note the follow
 This project was built collaboratively by:
 - **Nigam Vaghani**
 - **Dhanesh Vagahsiya**
-- **Rohit Sharma**
+- **Rohit Rathod**
 
 ---
 <!-- ok -->
