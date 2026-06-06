@@ -10,9 +10,7 @@ export const AppLayout = () => {
       <div className="absolute top-[20%] right-[-10%] w-[500px] h-[500px] bg-emerald-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000 z-[-1] pointer-events-none"></div>
       <div className="absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] bg-blue-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000 z-[-1] pointer-events-none"></div>
 
-      <div className="z-20 relative bg-background/80 backdrop-blur-md border-r border-border/50">
-        <Sidebar />
-      </div>
+      <Sidebar />
       
       <div className="flex-1 flex flex-col h-screen overflow-hidden z-10 relative">
         <div className="bg-background/80 backdrop-blur-md border-b border-border/50 relative z-20">

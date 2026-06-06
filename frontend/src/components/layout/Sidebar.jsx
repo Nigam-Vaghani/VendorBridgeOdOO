@@ -33,7 +33,7 @@ export const Sidebar = () => {
   const visibleLinks = allLinks.filter(link => user && link.roles.includes(user.role));
 
   return (
-    <div className="w-64 bg-primary text-primary-foreground flex-shrink-0 py-5 flex flex-col">
+    <div className="w-64 h-full min-h-screen bg-primary/80 backdrop-blur-md text-primary-foreground flex-shrink-0 py-5 flex flex-col shadow-xl border-r border-white/10">
       <div className="text-primary-foreground font-bold text-lg px-6 pb-5 border-b border-background mb-4">
         VendorBridge
       </div>
