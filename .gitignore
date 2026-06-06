@@ -1,0 +1,25 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDEs
+.idea/
+.vscode/
+
+# Python SQLite / temp files
+*.sqlite3
+.pytest_cache/
+
+# Node
+node_modules/
+.npm
