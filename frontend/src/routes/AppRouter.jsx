@@ -13,9 +13,10 @@ import { Vendors } from '../pages/Vendors/Vendors';
 import { RFQs } from '../pages/RFQs/RFQs';
 import { Quotations } from '../pages/Quotations/Quotations';
 import { QuotationComparison } from '../pages/Quotations/QuotationComparison';
+import { Approvals } from '../pages/Approvals/Approvals';
+import { Invoices } from '../pages/Invoices/Invoices';
 
 // Placeholders for other pages
-const Approvals = () => <div>Approvals</div>;
 const Unauthorized = () => <div className="p-10 text-red-600">Unauthorized Access</div>;
 
 export const AppRouter = () => {
@@ -38,7 +39,7 @@ export const AppRouter = () => {
           <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.VENDOR]} />}>
             <Route path="/rfqs" element={<RFQs />} />
             <Route path="/purchase-orders" element={<div>Purchase Orders</div>} />
-            <Route path="/invoices" element={<div>Invoices</div>} />
+            <Route path="/invoices" element={<Invoices />} />
           </Route>
 
           <Route element={<RoleRoute roles={[ROLES.OFFICER, ROLES.VENDOR]} />}>
@@ -49,7 +50,7 @@ export const AppRouter = () => {
             <Route path="/compare-quotes" element={<QuotationComparison />} />
           </Route>
 
-          <Route element={<RoleRoute roles={[ROLES.MANAGER]} />}>
+          <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER]} />}>
             <Route path="/approvals" element={<Approvals />} />
           </Route>
 

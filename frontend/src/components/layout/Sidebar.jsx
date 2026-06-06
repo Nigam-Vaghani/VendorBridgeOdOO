@@ -23,7 +23,7 @@ export const Sidebar = () => {
     { name: 'RFQs', path: '/rfqs', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.VENDOR], icon: FileText },
     { name: 'Quotations', path: '/quotations', roles: [ROLES.OFFICER, ROLES.VENDOR], icon: FileSignature },
     { name: 'Compare Quotes', path: '/compare-quotes', roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.OFFICER], icon: GitCompare },
-    { name: 'Approvals', path: '/approvals', roles: [ROLES.MANAGER], icon: CheckSquare },
+    { name: 'Approvals', path: '/approvals', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER], icon: CheckSquare },
     { name: 'Purchase Orders', path: '/purchase-orders', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.VENDOR], icon: ShoppingCart },
     { name: 'Invoices', path: '/invoices', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.VENDOR], icon: Receipt },
     { name: 'Analytics', path: '/analytics', roles: [ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER], icon: PieChart },
