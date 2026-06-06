@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import {
-  Bell, Check, FileText, CheckCircle, ShoppingCart,
-  Receipt, Users, CheckSquare, ChevronRight
+  Bell, Check, FileText, CheckCircle, Clock, ShoppingCart,
+  Receipt, Users, CheckSquare, XCircle, ChevronRight
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 
