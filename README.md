@@ -1,90 +1,68 @@
 <div align="center">
-  <br />
-  <h1>🌉 VendorBridge ERP</h1>
-  <p><strong>Next-Generation Procurement & Vendor Management System</strong></p>
-  <p>A comprehensive, role-based platform designed to automate and streamline the entire B2B procurement lifecycle—from Vendor onboarding and RFQs to Invoicing and Analytics.</p>
-  
+  <h1>VendorBridge ERP</h1>
+  <p>An open-source, full-lifecycle B2B procurement and vendor management system.</p>
+
   [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
   [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
   [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-  [![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org/)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 </div>
 
-<br />
+<br/>
 
-## 📖 Overview
+VendorBridge ERP is designed to modernize and automate enterprise procurement. It provides a unified platform where Procurement Teams, Managers, and Vendors can securely interact, negotiate, and finalize purchase cycles through structured workflows.
 
-**VendorBridge ERP** was built to solve the disjointed and manual processes plaguing modern enterprise procurement. By providing a unified, secure, and intuitive dashboard, VendorBridge brings Vendors, Procurement Officers, and Managers together in a single synchronized environment. 
+## Table of Contents
+- [Features](#features)
+- [Architecture](#architecture)
+- [Installation](#installation)
+- [Usage & Evaluation](#usage--evaluation)
+- [Contributing](#contributing)
+- [Team & Acknowledgments](#team--acknowledgments)
 
-Whether you are evaluating complex RFQs, managing multi-tier approval workflows, or generating professional financial PDFs, VendorBridge ensures complete auditability and efficiency.
+## Features
 
----
+- **Role-Based Access Control (RBAC):** Strict separation of concerns across Admin, Manager, Procurement Officer, and Vendor roles.
+- **Full Procurement Lifecycle:** Track items from Vendor Onboarding and RFQ (Request for Quotation) broadcasting, to Quote comparison, Approval workflows, PO generation, and Invoicing.
+- **Advanced Quote Algorithms:** Automated side-by-side ingestion and comparison of vendor bids to highlight optimal pricing.
+- **Dynamic Analytics:** Real-time data visualization of spending trends, vendor performance metrics, and category distributions using Recharts.
+- **Native PDF Exporting:** Custom print stylesheets allow direct browser-to-PDF conversion for clean, professional invoice generation.
 
-## ✨ Key Features
+## Architecture
 
-- 🔐 **Role-Based Access Control (RBAC)**: Distinct, securely scoped portals for `Admins`, `Managers`, `Procurement Officers`, and `Vendors`.
-- 📦 **End-to-End Procurement Lifecycle**:
-  - **Vendor Management**: Onboard, evaluate, and track vendor performance.
-  - **RFQ Generation**: Draft, broadcast, and manage Request for Quotations.
-  - **Quotation Comparison**: Automatically ingest and compare vendor quotes side-by-side to identify the best value.
-  - **Approval Workflows**: Multi-stage approval processes preventing unauthorized spending.
-  - **Purchase Orders & Invoicing**: Automated PO generation and one-click professional PDF invoice exporting.
-- 📊 **Dynamic Analytics Engine**: Real-time KPI aggregation, spend distribution tracking, and vendor performance history (powered by Recharts).
-- 🎨 **Minimalist Premium UI**: A highly responsive, glass-morphic two-color theme built on React and Tailwind CSS, prioritizing UX and accessibility.
-- 🖨️ **Native PDF Generation**: Meticulously crafted CSS `@media print` rules allowing direct, high-fidelity native browser PDF exporting.
+VendorBridge utilizes a modern, decoupled architecture:
+- **Frontend:** Built with React 18 and Vite. Styled using Tailwind CSS and structured with customized, minimalist components for a highly responsive user experience.
+- **Backend:** Powered by FastAPI for high-performance asynchronous API endpoints.
+- **Database:** Uses SQLAlchemy ORM. Configured with SQLite by default for rapid development and testing, with seamless drop-in support for PostgreSQL in production.
+- **Authentication:** Secure stateless sessions using PyJWT and bcrypt password hashing.
 
----
+## Installation
 
-## 💻 Tech Stack
-
-### Frontend
-* **Core:** React 18, Vite
-* **Styling:** Tailwind CSS, Custom UI components inspired by Shadcn UI
-* **Routing:** React Router DOM
-* **Visuals:** Lucide-React (Icons), Recharts (Data Visualization)
-* **State Management:** React Hooks (`useAuth`, Context API)
-
-### Backend
-* **Framework:** FastAPI (Python)
-* **Database:** SQLite (Default, configured for immediate drop-in replacement with PostgreSQL)
-* **ORM:** SQLAlchemy
-* **Authentication:** PyJWT, Passlib (Bcrypt hashing)
-* **Security:** FastAPI CORS middleware, secure HTTP-only configurations.
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-* **Node.js** (v18+ recommended)
-* **Python** (v3.10+ recommended)
+Ensure you have Node.js (v18+) and Python (v3.10+) installed.
 
 ### 1. Backend Setup
-Navigate to the root directory of the project:
 
 ```bash
-# Create a virtual environment
-python -m venv venv
+# Clone the repository
+git clone https://github.com/Nigam-Vaghani/VendorBridgeOdOO.git
+cd VendorBridgeOdOO
 
-# Activate the virtual environment
-# Windows:
-.\venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
+# Set up virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: .\venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Run the historical data seeder to populate the dashboard!
+# Run database migrations and seed historical data
 python backend/seed_historical.py
 
-# Start the FastAPI Server
+# Start the server
 uvicorn backend.main:app --reload
 ```
-*The backend will now be running at `http://localhost:8000`*
+The API will be available at `http://localhost:8000`.
 
 ### 2. Frontend Setup
-Open a new terminal and navigate to the frontend directory:
 
 ```bash
 cd frontend
@@ -92,39 +70,37 @@ cd frontend
 # Install dependencies
 npm install
 
-# Start the Vite development server
+# Start development server
 npm run dev
 ```
-*The frontend will now be accessible at `http://localhost:5173`*
+The application will be accessible at `http://localhost:5173`.
 
----
+## Usage & Evaluation
 
-## 🧪 Hackathon Evaluation Notes
+For hackathon evaluators and community testers:
+1. **Data Seeding:** We strongly recommend running `python backend/seed_historical.py` before testing. This seeds 6 months of historical relationships (Vendors, RFQs, POs) so that the Analytics engine is fully populated.
+2. **PDF Exports:** Navigate to the Invoices tab and utilize the "Export as PDF" functionality to test the print-media styles.
+3. **Role Testing:** The UI dynamically adapts based on the authenticated user. Try logging in as a Vendor to submit a bid, and subsequently as a Manager to approve it.
 
-If you are a judge or organizer evaluating this platform, please note the following highlights:
-1. **Dynamic Data Engine**: Run `python backend/seed_historical.py` prior to testing. This generates 6 months of interconnected, randomized historical procurement data (Vendors -> RFQs -> Quotes -> POs -> Invoices) so that the Analytics and Activity Log features demonstrate immediate real-world value.
-2. **Professional Exporting**: Navigate to the Analytics or Invoices pages and click "Export as PDF". The platform utilizes advanced Print CSS rules to format data into professional, highlightable documents dynamically.
-3. **Role Testing**: The system enforces strict API-level and UI-level isolation based on the user's role. Try creating a quote as a Vendor, and approving it as a Manager.
+## Contributing
 
----
+We welcome contributions! Please follow these steps:
+1. Fork the repository.
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
 
-## 👥 Team & Contributors
+## Team & Acknowledgments
 
-This project was built collaboratively by:
-- **Nigam Vaghani**
-- **Dhanesh Vagahsiya**
-- **Rohit Sharma**
+**Contributors:**
+- Nigam Vaghani
+- Dhanesh Vagahsiya
+- Rohit Sharma
 
----
-<!-- ok -->
-## 👨‍🏫 Evaluator
+**Evaluator:**
+Special thanks to our evaluator for reviewing this submission:
+- **Bhavya Mehta (mebh)** | [mebh@odoo.com](mailto:mebh@odoo.com) | GitHub: [@mebh-odoo](https://github.com/mebh-odoo)
 
-Special thanks to our evaluator for reviewing this hackathon submission:
-- **Bhavya Mehta (mebh)**
-  - 📧 Email: mebh@odoo.com
-  - 🐙 GitHub: [@mebh-odoo](https://github.com/mebh-odoo)
-
----
-
-## 🛡️ License
-Distributed under the MIT License. See `LICENSE` for more information.
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
