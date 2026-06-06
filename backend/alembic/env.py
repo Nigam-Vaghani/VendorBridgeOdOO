@@ -8,7 +8,7 @@ from sqlalchemy import pool
 from alembic import context
 
 # Insert project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -21,9 +21,9 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from backend.database import Base
-from backend.models import user
-from backend.config import settings
+from database import Base
+from config import settings
+import models  # Import all models to ensure they are registered with Base.metadata
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

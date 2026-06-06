@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from database import engine, Base
+import models  # Import all models to ensure they are registered with Base.metadata
 from routers import auth
 
 app = FastAPI(title="VendorBridge API")
