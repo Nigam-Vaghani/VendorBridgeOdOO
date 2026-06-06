@@ -3,6 +3,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { RoleRoute } from './RoleRoute';
 import { AppLayout } from '../components/layout/AppLayout';
 import { ROLES } from '../utils/constants';
+import { useAuth } from '../hooks/useAuth';
 
 import LoginPage from '../pages/Auth/LoginPage';
 import SignupPage from '../pages/Auth/SignupPage';
@@ -19,8 +20,30 @@ import { ActivityLogs } from '../pages/Logs/ActivityLogs';
 import { PurchaseOrders } from '../pages/PurchaseOrders/PurchaseOrders';
 import { Analytics } from '../pages/Analytics/Analytics';
 
-// Placeholders for other pages
-const Unauthorized = () => <div className="p-10 text-red-600">Unauthorized Access</div>;
+// Home Redirect logic based on roles
+const HomeRedirect = () => {
+  const { user } = useAuth();
+  
+  if (!user) return <Navigate to="/login" replace />;
+  
+  if (user.role === ROLES.VENDOR) {
+    return <Navigate to="/rfqs" replace />;
+  } else if (user.role === ROLES.MANAGER) {
+    return <Navigate to="/approvals" replace />;
+  } else {
+    return <Navigate to="/dashboard" replace />;
+  }
+};
+
+const Unauthorized = () => (
+  <div className="flex flex-col items-center justify-center min-h-[60vh]">
+    <h1 className="text-4xl font-bold text-red-600 mb-2">403</h1>
+    <p className="text-xl text-slate-600 font-semibold mb-4">Unauthorized Access</p>
+    <p className="text-slate-500 mb-6 text-center max-w-md">
+      You don't have permission to view this page. If you believe this is an error, please contact your administrator.
+    </p>
+  </div>
+);
 
 export const AppRouter = () => {
   return (
@@ -32,8 +55,8 @@ export const AppRouter = () => {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
+          <Route path="/" element={<HomeRedirect />} />
+          
           <Route element={<RoleRoute roles={[ROLES.ADMIN, ROLES.OFFICER, ROLES.MANAGER, ROLES.VENDOR]} />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/rfqs" element={<RFQs />} />
